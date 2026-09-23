@@ -1,59 +1,154 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+ESTABLISH THE LARAVEL PROJECT AND MAP ITS DEVOPS WORKFLOW
+## Project Description
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project is a Laravel-based web application developed as part of Laboratory 1. It demonstrates the basic setup of a Laravel project, MySQL database integration, Git version control, and GitHub repository management. The project also serves as a practical introduction to establishing a simple DevOps workflow for web application development.
 
-## About Laravel
+John Lloyd E. Escultura
+BSIT 4-3
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Software Requirements
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+* **PHP** 8.2 or later
+* **Composer** – PHP dependency manager
+* **Laravel** – Web application framework
+* **MySQL** – Database management system
+* **phpMyAdmin** – Database administration tool
+* **Git** – Version control system
+* **GitHub** – Remote repository hosting
+* **Node.js and npm** – For Laravel frontend asset management
+* **Web Browser** – Google Chrome, Microsoft Edge, or Mozilla Firefox
+* **Visual Studio Code** – Recommended code editor
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Laravel Installation Instructions
 
-## Learning Laravel
+1. Install PHP, Composer, MySQL, Git, and Node.js/npm on the computer.
+2. Create a new Laravel project using Composer:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+   ```bash
+   composer create-project laravel/laravel laravel-request-system
+   ```
+3. Navigate to the project directory:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+   ```bash
+   cd laravel-request-system
+   ```
+4. Copy `.env.example` to `.env`:
 
-## Laravel Sponsors
+   ```bash
+   cp .env.example .env
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+   On Windows:
 
-### Premium Partners
+   ```cmd
+   copy .env.example .env
+   ```
+5. Generate the Laravel application key:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+   ```bash
+   php artisan key:generate
+   ```
+6. Create a MySQL database named:
 
-## Contributing
+   ```text
+   laravel_request_system_db
+   ```
+7. Configure the database settings in the `.env` file:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   ```env
+   DB_DATABASE=laravel_request_system_db
+   DB_USERNAME=your_database_username
+   DB_PASSWORD=your_database_password
+   ```
+8. Run the database migrations:
 
-## Code of Conduct
+   ```bash
+   php artisan migrate
+   ```
+9. Start the Laravel development server:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   ```bash
+   php artisan serve
+   ```
+10. Open the application in a web browser:
 
-## Security Vulnerabilities
+```text
+http://127.0.0.1:8000
+```
+laravel_request_system_db
+## Database Import Instructions
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Start **MySQL** using XAMPP.
+2. Open **phpMyAdmin** at `http://localhost/phpmyadmin`.
+3. Create a database named:
 
-## License
+   ```text
+   laravel_request_system_db
+   ```
+4. Select the `laravel_request_system_db` database.
+5. Click the **Import** tab.
+6. Select the provided `.sql` database file.
+7. Make sure the format is set to **SQL**.
+8. Click **Import** to restore the database.
+9. Verify that the database tables were successfully created.
+10. Configure the Laravel `.env` file with the correct database connection settings.
+11. Run the application using:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan serve
+```
+
+## Commands Needed to Run the Project
+
+
+```bash
+cd DevOps
+```
+
+Install the PHP dependencies:
+
+```bash
+composer install
+```
+
+Create the environment file:
+
+```bash
+cp .env.example .env
+```
+
+For Windows:
+
+```cmd
+copy .env.example .env
+```
+
+Generate the Laravel application key:
+
+```bash
+php artisan key:generate
+```
+
+Configure the MySQL database in the `.env` file, then run the migrations:
+
+```bash
+php artisan migrate
+```
+
+Start the Laravel development server:
+
+```bash
+php artisan serve
+```
+
+Open the application in a web browser:
+
+```text
+http://127.0.0.1:8000
+```
+
+
+
+## Github Repository link
+
+https://github.com/JL1502/DevOps.git
