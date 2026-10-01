@@ -3,7 +3,7 @@
 
 This project is a Laravel-based web application developed as part of Laboratory 1. It demonstrates the basic setup of a Laravel project, MySQL database integration, Git version control, and GitHub repository management. The project also serves as a practical introduction to establishing a simple DevOps workflow for web application development.
 
-John Lloyd E. Escultura
+John Lloyd E. Escultura, Raydan Tagub
 BSIT 4-3
 
 ## Software Requirements
