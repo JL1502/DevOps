@@ -152,3 +152,34 @@ http://127.0.0.1:8000
 ## Github Repository link
 
 https://github.com/JL1502/DevOps.git
+
+
+## Request Data Model (Laboratory 2)
+
+### Database
+- Database name: [your_database_name] (see .env, not committed)
+
+### requests Table Fields
+| Field | Type | Constraint |
+|---|---|---|
+| id | bigIncrements | Primary key |
+| requester_name | string(100) | Required |
+| requester_email | string(255) | Required |
+| item_name | string(150) | Required |
+| quantity | unsignedInteger | Required, > 0 |
+| purpose | text | Required |
+| status | string(20) | Default: pending |
+| created_at / updated_at | timestamp | Auto-managed |
+
+### Migration
+php artisan make:migration create_requests_table
+php artisan migrate
+php artisan migrate:status
+
+### Verification
+1. Run `php artisan migrate:status` to confirm the migration ran.
+2. Open phpMyAdmin and inspect the `requests` table structure.
+3. Query: `SELECT id, requester_name, item_name, quantity, status FROM requests;`
+
+### User Stories
+See [link to user stories doc] or Activity 3 above.
