@@ -246,3 +246,21 @@ A row inserted without an explicit `status` value should display `pending`, conf
 * The `.env` file is excluded from version control and must never be committed.
 * No database export (`.sql`) files are included in this repository.
 * Sample data used for testing is documented in the lab report, not committed to the repository.
+
+## File Responsibilities and Maintainers
+
+| Area | Files | Maintainer |
+|---|---|---|
+| Policy | `app/Policies/ServiceRequestPolicy.php` | @driver-username |
+| Controller | `app/Http/Controllers/ServiceRequestController.php`, `app/Http/Requests/` | @driver-username |
+| Routes | `routes/web.php` | @driver-username |
+| Views | `resources/views/requests/` | @reviewer-username |
+| Tests | `tests/Feature/` | @reviewer-username |
+
+Changes to these areas must be reviewed by a maintainer other than the author. Review ownership is also enforced through `.github/CODEOWNERS`.
+
+## Access Rules
+- Guests are redirected to login.
+- Students list and view only their own requests (ownership is based on `user_id`).
+- Administrators can list and view all requests and are the only users who can update status.
+- Unauthorized access to another student's record returns **403 Forbidden**. This was chosen because Laravel's `Gate::authorize` returns it natively and it is applied consistently across all protected routes.
