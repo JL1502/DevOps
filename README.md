@@ -247,20 +247,55 @@ A row inserted without an explicit `status` value should display `pending`, conf
 * No database export (`.sql`) files are included in this repository.
 * Sample data used for testing is documented in the lab report, not committed to the repository.
 
-## File Responsibilities and Maintainers
+## SECURE REQUEST ACCESS: OWNERSHIP AND MAINTAINERS
+
+## Project Maintainers
+
+* **Driver (implements changes):** [John Lloyd Escultura] (@driver-username)
+* **Reviewer (inspects and tests changes):** [Raydan Tagub] (@reviewer-username)
+
+Driver and reviewer duties were exchanged during the session. Changes to the areas below must be reviewed by the maintainer who did not write them. Authors never approve their own pull request.
+
+## File Responsibilities
 
 | Area | Files | Maintainer |
 |---|---|---|
 | Policy | `app/Policies/ServiceRequestPolicy.php` | @driver-username |
-| Controller | `app/Http/Controllers/ServiceRequestController.php`, `app/Http/Requests/` | @driver-username |
+| Controller | `app/Http/Controllers/ServiceRequestController.php` | @driver-username |
+| Validation | `app/Http/Requests/StoreServiceRequestRequest.php`, `app/Http/Requests/UpdateServiceRequestStatusRequest.php` | @driver-username |
 | Routes | `routes/web.php` | @driver-username |
 | Views | `resources/views/requests/` | @reviewer-username |
 | Tests | `tests/Feature/` | @reviewer-username |
 
-Changes to these areas must be reviewed by a maintainer other than the author. Review ownership is also enforced through `.github/CODEOWNERS`.
+Review ownership is also set in `.github/CODEOWNERS`.
 
-## Access Rules
-- Guests are redirected to login.
-- Students list and view only their own requests (ownership is based on `user_id`).
-- Administrators can list and view all requests and are the only users who can update status.
-- Unauthorized access to another student's record returns **403 Forbidden**. This was chosen because Laravel's `Gate::authorize` returns it natively and it is applied consistently across all protected routes.
+## Review Settings
+
+* Branch protection and required pull-request reviews: [enabled / not available on this plan].
+* If these settings are unavailable, merging requires recorded peer approval on the pull request from the other maintainer. Accounts and access tokens are never shared.
+
+## Ownership Rules
+
+* Guests are redirected to login and see no request data.
+* A student lists and opens only their own requests. Ownership is decided by `user_id`, never by `requester_name` or `requester_email`.
+* An administrator can list and view all requests.
+* Any authenticated student can create a request.
+* Only an administrator can update a request's status.
+
+## Authorization Response
+
+Authorization is enforced on the server with `ServiceRequestPolicy` through `Gate::authorize()` before any protected data is returned or any row is written. Blade `@can` directives only control button visibility.
+
+When a student opens another student's record, or sends a status update they are not allowed to make, the application returns **403 Forbidden**. This was chosen because Laravel's policy system returns it natively, so the response is consistent on every protected route without custom exception handling. The denial response contains no details of the record.
+
+## Route Summary
+
+| Method | URL | Action | Access |
+|---|---|---|---|
+| GET | `/requests` | List requests | Signed-in users (students see only their own) |
+| GET | `/requests/create` | Show the create form | Students |
+| POST | `/requests` | Create a request | Students |
+| GET | `/requests/{id}` | View one request | Owner or administrator |
+| PATCH | `/requests/{id}/status` | Update status | Administrator only |
+
+All routes above are protected by `auth` middleware. Login and registration routes remain available to guests.
