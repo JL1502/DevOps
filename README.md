@@ -255,8 +255,8 @@ This laboratory adds authentication, ownership checks, and administrator-only st
 
 ## Project Maintainers
 
-* **Driver (implements changes):** [John Lloyd E. Escultura] (JL1502)
-* **Reviewer (inspects and tests changes):** [Raydan Tagub] (Redywen)
+* **Driver (implements changes):** [Full Name] (@driver-username)
+* **Reviewer (inspects and tests changes):** [Full Name] (@reviewer-username)
 
 Driver and reviewer duties were exchanged during the session. Authors never approve their own pull request.
 
@@ -264,13 +264,13 @@ Driver and reviewer duties were exchanged during the session. Authors never appr
 
 | Area | Files | Maintainer |
 |---|---|---|
-| Policy | `app/Policies/ServiceRequestPolicy.php` | JL1502 |
-| Controller | `app/Http/Controllers/ServiceRequestController.php` | JL1502 |
-| Validation | `app/Http/Requests/StoreServiceRequestRequest.php`, `app/Http/Requests/UpdateServiceRequestStatusRequest.php` | JL1502 |
-| Model | `app/Models/ServiceRequest.php` | JL1502 |
-| Routes | `routes/web.php` | JL1502 |
-| Views | `resources/views/requests/` | Reydwen |
-| Tests | `tests/Feature/` | Reydwen |
+| Policy | `app/Policies/ServiceRequestPolicy.php` | @driver-username |
+| Controller | `app/Http/Controllers/ServiceRequestController.php` | @driver-username |
+| Validation | `app/Http/Requests/StoreServiceRequestRequest.php`, `app/Http/Requests/UpdateServiceRequestStatusRequest.php` | @driver-username |
+| Model | `app/Models/ServiceRequest.php` | @driver-username |
+| Routes | `routes/web.php` | @driver-username |
+| Views | `resources/views/requests/` | @reviewer-username |
+| Tests | `tests/Feature/` | @reviewer-username |
 
 Review ownership is also set in `.github/CODEOWNERS`.
 
