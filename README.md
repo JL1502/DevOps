@@ -251,11 +251,11 @@ A row inserted without an explicit `status` value should display `pending`, conf
 
 | Area | Files | Maintainer |
 |---|---|---|
-| Policy | `app/Policies/ServiceRequestPolicy.php` | @driver-username |
-| Controller | `app/Http/Controllers/ServiceRequestController.php`, `app/Http/Requests/` | @driver-username |
-| Routes | `routes/web.php` | @driver-username |
-| Views | `resources/views/requests/` | @reviewer-username |
-| Tests | `tests/Feature/` | @reviewer-username |
+| Policy | `app/Policies/ServiceRequestPolicy.php` | John Lloyd |
+| Controller | `app/Http/Controllers/ServiceRequestController.php`, `app/Http/Requests/` | John Lloyd |
+| Routes | `routes/web.php` | John Lloyd |
+| Views | `resources/views/requests/` | Raydan |
+| Tests | `tests/Feature/` | Raydan |
 
 Changes to these areas must be reviewed by a maintainer other than the author. Review ownership is also enforced through `.github/CODEOWNERS`.
 
