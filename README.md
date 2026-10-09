@@ -260,12 +260,20 @@ Driver and reviewer duties were exchanged during the session. Changes to the are
 
 | Area | Files | Maintainer |
 |---|---|---|
+<<<<<<< HEAD
 | Policy | `app/Policies/ServiceRequestPolicy.php` | @driver-username |
 | Controller | `app/Http/Controllers/ServiceRequestController.php` | @driver-username |
 | Validation | `app/Http/Requests/StoreServiceRequestRequest.php`, `app/Http/Requests/UpdateServiceRequestStatusRequest.php` | @driver-username |
 | Routes | `routes/web.php` | @driver-username |
 | Views | `resources/views/requests/` | @reviewer-username |
 | Tests | `tests/Feature/` | @reviewer-username |
+=======
+| Policy | `app/Policies/ServiceRequestPolicy.php` | John Lloyd |
+| Controller | `app/Http/Controllers/ServiceRequestController.php`, `app/Http/Requests/` | John Lloyd |
+| Routes | `routes/web.php` | John Lloyd |
+| Views | `resources/views/requests/` | Raydan |
+| Tests | `tests/Feature/` | Raydan |
+>>>>>>> origin/main
 
 Review ownership is also set in `.github/CODEOWNERS`.
 
