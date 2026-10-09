@@ -276,7 +276,7 @@ Review ownership is also set in `.github/CODEOWNERS`.
 
 ## Review Settings
 
-* Branch protection and required pull-request reviews: [enabled / not available on this plan].
+* Branch protection and required pull-request reviews: enabled on main (pull request required, 1 approval).
 * If these are unavailable, merging requires recorded peer approval on the pull request from the other maintainer. Accounts and access tokens are never shared.
 
 ## Ownership Rules
@@ -367,10 +367,10 @@ Verify each denied write by comparing the database values before and after the a
 ## Dependency Audit
 
 * **`composer audit`:** No security vulnerability advisories found.
-* **`npm audit`:** [N] vulnerabilities reported ([x] moderate, [y] high), including `braces` (high, denial of service through deeply nested patterns) and `postcss-selector-parser` (moderate, CPU exhaustion). All findings trace back to `tailwindcss` and its build-time dependencies.
-* **`npm audit --omit=dev`:** [record the actual result].
+* **`npm audit`:** 9 vulnerabilities reported (2 moderate, 5 high, 2 critical). The `braces` (high, denial of service through deeply nested patterns) and `postcss-selector-parser` (moderate, CPU exhaustion) findings trace back to `tailwindcss` and its build-time dependencies. The two critical findings are in `shell-quote` (command injection), which comes in through `concurrently`, a development-only helper.
+* **`npm audit --omit=dev`:** found 0 vulnerabilities. All reported issues are in development and build-time packages and are not part of the production dependencies.
 * The suggested `npm audit fix --force` would install `tailwindcss@4.3.3`, a breaking change, so it was **not** applied.
-* **Follow-up:** plan a reviewed Tailwind CSS upgrade in a separate pull request, then rerun `npm audit`, rebuild the assets, and retest the pages. No packages were upgraded without review.
+* **Follow-up:** plan a reviewed dependency update in a separate pull request (a plain `npm audit fix` for `shell-quote`, and a Tailwind CSS upgrade), then rerun `npm audit`, rebuild the assets, and retest the pages. No packages were upgraded without review.
 
 ## Exposed Secret Response
 
