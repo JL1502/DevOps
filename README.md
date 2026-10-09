@@ -247,40 +247,37 @@ A row inserted without an explicit `status` value should display `pending`, conf
 * No database export (`.sql`) files are included in this repository.
 * Sample data used for testing is documented in the lab report, not committed to the repository.
 
-## SECURE REQUEST ACCESS: OWNERSHIP AND MAINTAINERS
+## SECURE REQUEST ACCESS THROUGH REVIEWED CHANGES (Laboratory 3)
+
+## Project Description
+
+This laboratory adds authentication, ownership checks, and administrator-only status updates to the request system from Laboratory 2. Access is enforced on the server with a Laravel policy, input is validated on the server, and every change was made on a feature branch and reviewed through a pull request.
 
 ## Project Maintainers
 
-* **Driver (implements changes):** [John Lloyd Escultura] (@driver-username)
-* **Reviewer (inspects and tests changes):** [Raydan Tagub] (@reviewer-username)
+* **Driver (implements changes):** [John Lloyd E. Escultura] (@JL1502)
+* **Reviewer (inspects and tests changes):** [Raydan Tagub] (@Reyndwen)
 
-Driver and reviewer duties were exchanged during the session. Changes to the areas below must be reviewed by the maintainer who did not write them. Authors never approve their own pull request.
+Driver and reviewer duties were exchanged during the session. Authors never approve their own pull request.
 
 ## File Responsibilities
 
 | Area | Files | Maintainer |
 |---|---|---|
-<<<<<<< HEAD
-| Policy | `app/Policies/ServiceRequestPolicy.php` | @driver-username |
-| Controller | `app/Http/Controllers/ServiceRequestController.php` | @driver-username |
-| Validation | `app/Http/Requests/StoreServiceRequestRequest.php`, `app/Http/Requests/UpdateServiceRequestStatusRequest.php` | @driver-username |
-| Routes | `routes/web.php` | @driver-username |
-| Views | `resources/views/requests/` | @reviewer-username |
-| Tests | `tests/Feature/` | @reviewer-username |
-=======
-| Policy | `app/Policies/ServiceRequestPolicy.php` | John Lloyd |
-| Controller | `app/Http/Controllers/ServiceRequestController.php`, `app/Http/Requests/` | John Lloyd |
-| Routes | `routes/web.php` | John Lloyd |
-| Views | `resources/views/requests/` | Raydan |
-| Tests | `tests/Feature/` | Raydan |
->>>>>>> origin/main
+| Policy | `app/Policies/ServiceRequestPolicy.php` | JL1502 |
+| Controller | `app/Http/Controllers/ServiceRequestController.php` | @JL1502 |
+| Validation | `app/Http/Requests/StoreServiceRequestRequest.php`, `app/Http/Requests/UpdateServiceRequestStatusRequest.php` | @JL1502 |
+| Model | `app/Models/ServiceRequest.php` | @dJL1502 |
+| Routes | `routes/web.php` | @JL1502 |
+| Views | `resources/views/requests/` | @Reydwen |
+| Tests | `tests/Feature/` | @Reydwen |
 
 Review ownership is also set in `.github/CODEOWNERS`.
 
 ## Review Settings
 
 * Branch protection and required pull-request reviews: [enabled / not available on this plan].
-* If these settings are unavailable, merging requires recorded peer approval on the pull request from the other maintainer. Accounts and access tokens are never shared.
+* If these are unavailable, merging requires recorded peer approval on the pull request from the other maintainer. Accounts and access tokens are never shared.
 
 ## Ownership Rules
 
@@ -289,6 +286,7 @@ Review ownership is also set in `.github/CODEOWNERS`.
 * An administrator can list and view all requests.
 * Any authenticated student can create a request.
 * Only an administrator can update a request's status.
+* Students cannot set `user_id`, `status`, `is_admin`, or `role`. The server sets `user_id`, `requester_name`, and `requester_email` from the signed-in account, and sets the initial status to `pending`.
 
 ## Authorization Response
 
@@ -307,3 +305,79 @@ When a student opens another student's record, or sends a status update they are
 | PATCH | `/requests/{id}/status` | Update status | Administrator only |
 
 All routes above are protected by `auth` middleware. Login and registration routes remain available to guests.
+
+## Setup and Migration Steps
+
+1. Complete the Laboratory 1 setup and Laboratory 2 data-model steps above.
+2. Authentication scaffolding was added with Laravel Breeze (login, registration, and password hashing):
+
+```bash
+composer require laravel/breeze --dev
+php artisan breeze:install blade
+npm install
+npm run build
+```
+
+3. Switch to the feature branch:
+
+```bash
+git switch feature/lab3-secure-requests
+```
+
+4. Run the migrations. Laboratory 3 adds `user_id` to `requests` and `is_admin` to `users`:
+
+```bash
+php artisan migrate
+php artisan migrate:status
+```
+
+5. Create fictional accounts (two students and one administrator) with hashed passwords, for example through `php artisan tinker` or a seeder. The administrator flag is set only through trusted setup, never through a form. Do not commit passwords.
+6. Link the Laboratory 2 sample requests to the student accounts through `user_id` without deleting any rows.
+7. Start the application:
+
+```bash
+php artisan serve
+```
+
+## Testing Steps
+
+Use separate browser sessions, or log out between accounts. Run all tests on the local test project.
+
+1. **T01:** While logged out, open `/requests` and `/requests/{id}`. Expect a login redirect and no request data.
+2. **T02:** Log in as Student A, then Student B. Each sees only their own requests and can open them.
+3. **T03:** Each student opens the other student's record ID directly. Expect 403 and no details.
+4. **T04:** Each student sends a status PATCH with a valid session and CSRF token. Expect 403 and an unchanged database status.
+5. **T05:** The administrator lists all requests, opens one, and updates its status. Expect the change to be saved.
+6. **T06:** Submit quantity `0`, `-1`, a non-integer, or a blank item name. Expect rejection and no new row.
+7. **T07:** Submit `user_id`, `status`, `is_admin`, or `role` as a student. Expect rejection with no spoofed values saved.
+8. **T08:** Submit text containing `<b>LAB3</b>` and an apostrophe. Expect the markup shown literally and the apostrophe stored safely.
+9. **T09:** Send a write with a missing or invalid CSRF token through the live browser or an HTTP request. Expect 419 and an unchanged database. (Automated feature tests normally disable CSRF middleware, so this test is run live.)
+10. **T10:** As administrator, submit an invalid status. Expect rejection and an unchanged status.
+
+Verify each denied write by comparing the database values before and after the attempt.
+
+## Security Notes
+
+* Passwords are hashed with Laravel's `Hash` facade.
+* `.env` is excluded through `.gitignore`, and `.env.example` contains no real credentials.
+* `APP_DEBUG` is `false` in shared or deployed environments, so errors do not reveal SQL details or secrets.
+* Queries use Eloquent with an explicit allowlist of validated input. `$request->all()` is not used for inserts or updates.
+* Output is escaped with Blade `{{ }}`, and `@csrf` is present on every POST and PATCH form.
+
+## Dependency Audit
+
+* **`composer audit`:** No security vulnerability advisories found.
+* **`npm audit`:** [N] vulnerabilities reported ([x] moderate, [y] high), including `braces` (high, denial of service through deeply nested patterns) and `postcss-selector-parser` (moderate, CPU exhaustion). All findings trace back to `tailwindcss` and its build-time dependencies.
+* **`npm audit --omit=dev`:** [record the actual result].
+* The suggested `npm audit fix --force` would install `tailwindcss@4.3.3`, a breaking change, so it was **not** applied.
+* **Follow-up:** plan a reviewed Tailwind CSS upgrade in a separate pull request, then rerun `npm audit`, rebuild the assets, and retest the pages. No packages were upgraded without review.
+
+## Exposed Secret Response
+
+If a secret such as a database password or API key is ever committed, it must first be revoked or rotated so the old value is useless. It must then be removed from the repository, and its history must be addressed (for example with `git filter-repo` or BFG Repo-Cleaner, followed by a force push and a fresh clone for collaborators). Deleting the file in a later commit is not enough, because the secret remains in Git history.
+
+## Repository Notes
+
+* The `.env` file is excluded from version control and must never be committed.
+* No database export (`.sql`) files are included in this repository.
+* Sample data used for testing is documented in the lab reports, not committed to the repository.
