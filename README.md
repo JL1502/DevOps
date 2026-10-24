@@ -381,3 +381,147 @@ If a secret such as a database password or API key is ever committed, it must fi
 * The `.env` file is excluded from version control and must never be committed.
 * No database export (`.sql`) files are included in this repository.
 * Sample data used for testing is documented in the lab reports, not committed to the repository.
+
+---
+
+## Laboratory 4: Running the Request System in Docker
+
+This section adds a reproducible container environment for the Laravel request system. The documentation from Laboratories 1, 2 and 3 above is unchanged.
+
+### Docker requirements
+- Docker Desktop (or Docker Engine) with Docker Compose v2: `docker --version`, `docker compose version`
+- Git
+- A free local port for the web server (default `8080`)
+- Docker must be running before any `docker compose` command
+
+### Container diagram
+
+```
+Browser --> http://127.0.0.1:8080
+              |
+        [ web : Nginx, serves public/ only ]
+              |  FastCGI, port 9000 (network: appnet)
+        [ app : PHP-FPM + Laravel, non-root user ]
+              |  MySQL, port 3306 (network: appnet)
+        [ db  : MySQL 8.0 ] ---- volume db_data (/var/lib/mysql)
+```
+
+### Services
+
+| Service | Purpose | Connects to | Key configuration |
+|---|---|---|---|
+| web | Serves Laravel through Nginx | app:9000 | Published as `127.0.0.1:8080` only; web root is `public/` |
+| app | Runs Laravel with PHP-FPM | db:3306 | Non-root `laravel` user; settings from `.env.container`; starts after db is healthy |
+| db | MySQL 8.0 database | Internal network only | No published port; named volume `db_data`; health check |
+
+Base images are version-pinned: `composer:2.8`, `node:20-alpine`, `php:8.3-fpm-alpine`, `nginxinc/nginx-unprivileged:1.27-alpine`, `mysql:8.0`. The Dockerfile is multi-stage: Composer and Node run in separate build stages, and only the installed dependencies and built assets are copied into the final images.
+
+### Environment configuration
+
+Runtime settings live in `.env.container`, which is **never committed** (it is listed in `.gitignore` and `.dockerignore`). Create it from the template and fill in your own values:
+
+```bash
+cp .env.container.example .env.container      # Windows PowerShell: copy .env.container.example .env.container
+```
+
+Placeholders in `.env.container.example`:
+
+| Variable | Placeholder / value | Notes |
+|---|---|---|
+| `APP_KEY` | empty | Generate once, see below, then keep it unchanged |
+| `DB_HOST` | `db` | Name of the database service |
+| `DB_PORT` | `3306` | |
+| `DB_DATABASE` / `MYSQL_DATABASE` | `laravel_request_container_db` | Separate from any XAMPP database |
+| `DB_USERNAME` / `MYSQL_USER` | `CHANGE_ME_DB_USER` | Must be the same value |
+| `DB_PASSWORD` / `MYSQL_PASSWORD` | `CHANGE_ME_DB_PASSWORD` | Must be the same value; use letters and numbers |
+| `MYSQL_ROOT_PASSWORD` | `CHANGE_ME_ROOT_PASSWORD` | Different from the app password |
+
+Generate the application key once (it only prints the key; paste it after `APP_KEY=`):
+
+```bash
+docker compose build app
+docker compose run --rm --no-deps app php artisan key:generate --show
+```
+
+MySQL reads the `MYSQL_*` values only when the `db_data` volume is first created. Changing them later does not change an existing database account. Change an existing password with `ALTER USER` instead of deleting the volume.
+
+### Build and startup
+
+```bash
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps
+```
+
+Open http://127.0.0.1:8080 (HTTP, not HTTPS).
+
+### Migrations
+
+```bash
+docker compose exec app php artisan migrate
+docker compose exec app php artisan migrate:status
+```
+
+Never use `migrate:fresh`, and never use `docker compose down -v`. Create two fictional student accounts and one administrator using the approved setup method (register page, seeder or tinker).
+
+### Health checks
+
+```bash
+docker compose ps                      # db and app should show "healthy"
+docker compose logs --tail=50 app      # read recent logs; never paste secrets
+docker compose logs --tail=50 db
+```
+
+- `db` is checked with `mysqladmin ping`; `app` waits until `db` is healthy before it starts.
+- `app` is checked by confirming that PHP-FPM is running.
+
+### Persistence testing results
+
+Test record: `CONTAINER-PERSIST-01`.
+
+| Stage | App container ID | Request ID | Details | Result |
+|---|---|---|---|---|
+| Before replacement | `858464b6958e` | [ID] | [owner, item, quantity, status] | Saved |
+| After `up -d --force-recreate --no-deps app` | `7695aa00380f` | [same ID] | [same] | Persisted |
+| After `down` then `up -d` | [new ID] | [same ID] | [same] | Persisted |
+
+Commands used:
+
+```bash
+docker compose ps -q app
+docker compose up -d --force-recreate --no-deps app
+docker compose restart web
+docker compose down
+docker compose up -d
+```
+
+Records persist because MySQL stores its data in the named volume `db_data`, which Docker manages separately from any container. Replacing or removing the app or database container does not delete the volume, and the new container mounts the same data.
+
+A volume is not a backup. It is one copy on one disk, so it does not protect against accidental deletion, corrupted or wrongly changed data, or hardware failure. Keep separate, tested database backups.
+
+### Reproduction procedure
+
+A reviewer can reproduce the environment in a clean folder, with its own project name, port and database volume:
+
+```powershell
+git clone <repo-url> lab4-repro
+cd lab4-repro
+git checkout <reviewed commit SHA or feature/lab4-containers>
+copy .env.container.example .env.container      # fill in private values
+$env:COMPOSE_PROJECT_NAME = "lab4-repro"
+$env:WEB_PORT = "8081"
+docker compose build app
+docker compose run --rm --no-deps app php artisan key:generate --show   # paste into APP_KEY
+docker compose up -d --build
+docker compose exec app php artisan migrate
+```
+
+Then open http://127.0.0.1:8081 and test login and requests. `docker volume ls` should show a separate `lab4-repro_db_data` volume. (On macOS or Linux, use `export COMPOSE_PROJECT_NAME=lab4-repro WEB_PORT=8081`.) Compose does not read these two variables from `.env.container`, so set them in the shell as shown.
+
+### Security notes
+
+- The app runs as a non-root user (`docker compose exec app id`), MySQL has no published port, and the web service is bound to `127.0.0.1` only.
+- `.dockerignore` excludes `.env*`, keys, `.git`, `vendor`, `node_modules`, dumps, archives and logs.
+- Only `.env.container.example` (placeholders) is committed.
+
+**Why credentials must not be stored inside Docker images:** an image is a set of layers that anyone who receives it can inspect, including through `docker history`. Images are copied, shared and pushed to registries, and a secret baked in at build time stays in the layers even if a later step deletes it. It also cannot be changed without rebuilding. Passing credentials at runtime through `.env.container` keeps them out of the image and out of Git, and lets each environment use its own values.
