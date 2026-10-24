@@ -1,0 +1,40 @@
+# Secrets
+.env
+.env.*
+!.env.container.example
+*.pem
+*.key
+id_rsa*
+auth.json
+
+# VCS and tooling
+.git
+.gitignore
+.github
+.idea
+.vscode
+
+# Host-built dependencies (rebuilt in the image from lockfiles)
+vendor
+node_modules
+
+# Database dumps, archives, logs
+*.sql
+*.sqlite
+*.dump
+*.bak
+*.zip
+*.tar
+*.tar.gz
+*.log
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Test/build leftovers
+public/hot
+public/build
+public/storage
+tests
+bootstrap/cache/*.php
