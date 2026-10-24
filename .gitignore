@@ -24,3 +24,5 @@ Homestead.yaml
 Thumbs.db
 
 .env.container
+
+.env.container
