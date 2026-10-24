@@ -1,0 +1,16 @@
+# Dependency directories must come from the image build, not the host.
+/vendor
+/node_modules
+
+# Keep local environment files and secrets out of the build context.
+.env
+.env.*
+!.env.example
+!env.container.example
+
+# Ignore generated Laravel cache manifests.
+/bootstrap/cache/*.php
+
+# Other local-only files.
+.git
+.DS_Store

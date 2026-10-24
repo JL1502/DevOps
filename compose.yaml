@@ -1,0 +1,51 @@
+name: ${COMPOSE_PROJECT_NAME:-laravel-request}
+
+services:
+  web:
+    build:
+      context: .
+      target: web
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:8080"   # local-only binding
+    depends_on:
+      app:
+        condition: service_healthy
+    networks: [appnet]
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      target: app
+    env_file: .env.container                  # runtime secrets, never in the image
+    depends_on:
+      db:
+        condition: service_healthy            # wait for MySQL readiness, not just start
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep php-fpm >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [appnet]
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    env_file: .env.container
+    # No "ports:" entry, so MySQL is reachable only inside appnet
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [appnet]
+    restart: unless-stopped
+
+networks:
+  appnet:
+
+volumes:
+  db_data:
