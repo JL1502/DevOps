@@ -21,7 +21,9 @@
             </form>
 
             @can('create', App\Models\ServiceRequest::class)
-                <a href="{{ route('requests.create') }}" class="inline-block mb-4 px-3 py-1 bg-blue-600 text-white rounded">New request</a>
+                <button type="button" onclick="window.location='{{ route('requests.create') }}'" class="mb-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                    New request
+                </button>
             @endcan
 
             <table class="w-full text-left">

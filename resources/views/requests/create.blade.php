@@ -25,8 +25,12 @@
                     <label>Purpose</label><br>
                     <textarea name="purpose" maxlength="2000" required class="border rounded px-2 py-1 w-full">{{ old('purpose') }}</textarea>
                 </div>
-                <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded">Submit request</button>
-                <a href="{{ route('requests.index') }}" class="ml-2 text-blue-600 underline">Cancel</a>
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="submit" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Create request
+                    </button>
+                    <a href="{{ route('requests.index') }}" class="text-sm font-medium text-blue-600 underline hover:text-blue-500">Cancel</a>
+                </div>
             </form>
         </div>
     </div>
