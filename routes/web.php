@@ -31,3 +31,17 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+use Illuminate\Support\Facades\DB;
+Route::get('/health', function () {
+    try {
+        DB::select('select 1');
+        $db = true;
+    } catch (\Throwable $e) {
+        $db = false;
+    }
+    return response()->json([
+        'status'  => $db ? 'ok' : 'error',
+        'version' => config('app.version'),
+    ], $db ? 200 : 503);
+});
