@@ -1,0 +1,86 @@
+name: Staging release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Git tag to release, for example v1.0.0"
+        required: true
+        default: "v1.0.0"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo_sqlite
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan test
+
+  build:
+    needs: ci
+    runs-on: ubuntu-latest
+    outputs:
+      app_digest: ${{ steps.app.outputs.digest }}
+      web_digest: ${{ steps.web.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image names (lowercase)
+        run: echo "OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+      - id: app
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: app
+          push: true
+          tags: ghcr.io/${{ env.OWNER }}/laravel-staging-app:${{ inputs.version }}
+      - id: web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: web
+          push: true
+          tags: ghcr.io/${{ env.OWNER }}/laravel-staging-web:${{ inputs.version }}
+      - name: Release record
+        run: |
+          {
+            echo "## Release record"
+            echo "- Version: ${{ inputs.version }}"
+            echo "- Commit SHA: $(git rev-parse HEAD)"
+            echo "- App digest: ${{ steps.app.outputs.digest }}"
+            echo "- Web digest: ${{ steps.web.outputs.digest }}"
+            echo "- CI: passed (job ci)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging   # waits here for the required reviewer
+    steps:
+      - name: Approved. Deploy on the staging computer
+        run: |
+          {
+            echo "## Approved for staging"
+            echo "Run on the staging computer:"
+            echo '```'
+            echo ".\\deploy.ps1 -Version ${{ inputs.version }} -AppDigest ${{ needs.build.outputs.app_digest }} -WebDigest ${{ needs.build.outputs.web_digest }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
