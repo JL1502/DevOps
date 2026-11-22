@@ -63,6 +63,10 @@ class ServiceRequestController extends Controller
      */
     public function create()
     {
+        if (app()->environment('production')) {
+            abort(503, 'Request form disabled (lab fault)');
+        }
+
         Gate::authorize('create', ServiceRequest::class);
 
         return view('requests.create');
@@ -75,6 +79,10 @@ class ServiceRequestController extends Controller
      */
     public function store(StoreServiceRequestRequest $request)
     {
+        if (app()->environment('production')) {
+            abort(503, 'Request form disabled (lab fault)');
+        }
+
         Gate::authorize('create', ServiceRequest::class);
 
         $validated = $request->validated(); // item_name, quantity, purpose only
