@@ -1,0 +1,49 @@
+name: laravel-staging
+
+services:
+  web:
+    image: ${WEB_IMAGE:?set WEB_IMAGE}
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:8080"
+    depends_on:
+      app:
+        condition: service_healthy
+    networks: [appnet]
+    restart: unless-stopped
+
+  app:
+    image: ${APP_IMAGE:?set APP_IMAGE}
+    env_file: .env.staging          # runtime secrets, never in Git
+    environment:
+      APP_DEBUG: "false"            # set through the runtime procedure
+      APP_VERSION: ${APP_VERSION:?set APP_VERSION}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep php-fpm >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [appnet]
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    env_file: .env.staging
+    volumes:
+      - staging_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [appnet]
+    restart: unless-stopped
+
+networks:
+  appnet:
+
+volumes:
+  staging_db_data:
